@@ -24,15 +24,15 @@ import SettingsIcon from "@mui/icons-material/Settings";
 const drawerWidth = 260;
 
 const menuItems = [
-  { text: "Dashboard", icon: <DashboardIcon /> },
-  { text: "Clientes", icon: <PeopleIcon /> },
-  { text: "Productos", icon: <InventoryIcon /> },
-  { text: "Compras", icon: <ShoppingCartIcon /> },
-  { text: "Producción", icon: <FactoryIcon /> },
-  { text: "Costos", icon: <AttachMoneyIcon /> },
-  { text: "Ventas", icon: <PointOfSaleIcon /> },
-  { text: "Reportes", icon: <AssessmentIcon /> },
-  { text: "Configuración", icon: <SettingsIcon /> },
+  { text: "Dashboard", path: "/", icon: <DashboardIcon /> },
+  { text: "Clientes", path: "/clientes", icon: <PeopleIcon /> },
+  { text: "Productos", path: "/productos", icon: <InventoryIcon /> },
+  { text: "Compras", path: "/compras", icon: <ShoppingCartIcon /> },
+  { text: "Producción", path: "/produccion", icon: <FactoryIcon /> },
+  { text: "Costos", path: "/costos", icon: <AttachMoneyIcon /> },
+  { text: "Ventas", path: "/ventas", icon: <PointOfSaleIcon /> },
+  { text: "Reportes", path: "/reportes", icon: <AssessmentIcon /> },
+  { text: "Configuración", path: "/configuracion", icon: <SettingsIcon /> },
 ];
 
 export default function MainLayout() {
@@ -79,7 +79,11 @@ export default function MainLayout() {
 
           {menuItems.map((item) => (
 
-            <ListItemButton key={item.text}>
+  <ListItemButton
+    key={item.text}
+    component="a"
+    href={item.path}
+  >
 
               <ListItemIcon
                 sx={{
