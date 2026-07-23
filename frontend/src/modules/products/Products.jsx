@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import ProductsTable from "./components/ProductsTable";
 import ProductToolbar from "./components/ProductToolbar";
@@ -10,24 +10,62 @@ import productsData from "./data/products";
 
 export default function Products() {
 
-  const [products, setProducts] = useState(productsData);
+  const [products, setProducts] = useState(() => {
+
+  const savedProducts =
+    localStorage.getItem("elinor_products");
+
+  if (savedProducts) {
+    return JSON.parse(savedProducts);
+  }
+
+  return productsData.map((product, index) => ({
+    ...product,
+    id: product.id || index + 1,
+  }));
+
+});
 
   const [search, setSearch] = useState("");
 
   const [openDialog, setOpenDialog] = useState(false);
 
+  const [productToEdit, setProductToEdit] = useState(null);
+  useEffect(() => {
 
-  const handleAddProduct = (newProduct) => {
+  localStorage.setItem(
+    "elinor_products",
+    JSON.stringify(products)
+  );
+}, [products]);
 
-    setProducts([
-      ...products,
-      {
-        ...newProduct,
-        id: Date.now(),
-      },
-    ]);
+
+  const handleSaveProduct = (product) => {
+console.log("GUARDANDO PRODUCTO", product);
+    if (product.id) {
+
+      setProducts(
+        products.map((item) =>
+          item.id === product.id
+            ? product
+            : item
+        )
+      );
+
+    } else {
+
+      setProducts([
+        ...products,
+        {
+          ...product,
+          id: Date.now(),
+        },
+      ]);
+
+    }
 
     setOpenDialog(false);
+    setProductToEdit(null);
 
   };
 
@@ -39,6 +77,14 @@ export default function Products() {
         (product) => product.id !== id
       )
     );
+
+  };
+
+
+  const handleEditProduct = (product) => {
+
+    setProductToEdit(product);
+    setOpenDialog(true);
 
   };
 
@@ -66,7 +112,10 @@ export default function Products() {
       <ProductToolbar
         search={search}
         setSearch={setSearch}
-        onNewProduct={() => setOpenDialog(true)}
+        onNewProduct={() => {
+          setProductToEdit(null);
+          setOpenDialog(true);
+        }}
       />
 
 
@@ -74,9 +123,7 @@ export default function Products() {
         products={
           filteredProducts.map((product) => ({
             ...product,
-            onEdit: (item) =>
-              console.log("Editar:", item),
-
+            onEdit: handleEditProduct,
             onDelete: handleDeleteProduct,
           }))
         }
@@ -86,11 +133,13 @@ export default function Products() {
       <ProductDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
-        onSave={handleAddProduct}
+        onSave={handleSaveProduct}
+        productToEdit={productToEdit}
       />
 
 
     </Box>
 
   );
+
 }

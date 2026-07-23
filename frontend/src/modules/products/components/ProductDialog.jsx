@@ -6,44 +6,81 @@ import {
   TextField,
   Button,
   MenuItem,
-  Stack,
 } from "@mui/material";
 
-import { useState } from "react";
-
-export default function ProductDialog({ open, onClose, onSave }) {
-
-  const [form, setForm] = useState({
-    code: "",
-    name: "",
-    category: "",
-    unit: "KG",
-    stock: "",
-    minStock: "",
-    cost: "",
-    price: "",
-  });
+import { useState, useEffect } from "react";
 
 
-  const handleChange = (e) => {
+const emptyForm = {
+  code: "",
+  name: "",
+  category: "",
+  unit: "KG",
+  stock: "",
+  minStock: "",
+  cost: "",
+  price: "",
+};
+
+
+export default function ProductDialog({
+  open,
+  onClose,
+  onSave,
+  productToEdit,
+}) {
+
+
+  const [form, setForm] = useState(emptyForm);
+
+
+  useEffect(() => {
+
+    if (productToEdit) {
+
+      setForm({
+        code: productToEdit.code || "",
+        name: productToEdit.name || "",
+        category: productToEdit.category || "",
+        unit: productToEdit.unit || "KG",
+        stock: productToEdit.stock || "",
+        minStock: productToEdit.minStock || "",
+        cost: productToEdit.cost || "",
+        price: productToEdit.price || "",
+        id: productToEdit.id,
+      });
+
+    } else {
+
+      setForm(emptyForm);
+
+    }
+
+  }, [productToEdit, open]);
+
+
+  const handleChange = (event) => {
+
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     });
+
   };
 
 
- const handleSave = () => {
+  const handleSave = () => {
 
-  onSave({
-    ...form,
-    stock: Number(form.stock),
-    minStock: Number(form.minStock),
-    cost: Number(form.cost),
-    price: Number(form.price),
-  });
+    onSave({
+      ...form,
+      id: productToEdit?.id,
+      stock: Number(form.stock),
+      minStock: Number(form.minStock),
+      cost: Number(form.cost),
+      price: Number(form.price),
+    });
 
-};
+  };
 
 
   return (
@@ -56,97 +93,113 @@ export default function ProductDialog({ open, onClose, onSave }) {
     >
 
       <DialogTitle>
-        Nuevo Producto
+        {productToEdit
+          ? "Editar Producto"
+          : "Nuevo Producto"}
       </DialogTitle>
 
 
       <DialogContent>
 
-        <Stack spacing={2} mt={1}>
 
-          <TextField
-            label="Código"
-            name="code"
-            value={form.code}
-            onChange={handleChange}
-          />
-
-
-          <TextField
-            label="Nombre del producto"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-          />
+        <TextField
+          margin="dense"
+          label="Código"
+          name="code"
+          fullWidth
+          value={form.code}
+          onChange={handleChange}
+        />
 
 
-          <TextField
-            label="Categoría"
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-          />
+        <TextField
+          margin="dense"
+          label="Nombre"
+          name="name"
+          fullWidth
+          value={form.name}
+          onChange={handleChange}
+        />
 
 
-          <TextField
-            select
-            label="Unidad"
-            name="unit"
-            value={form.unit}
-            onChange={handleChange}
-          >
-
-            <MenuItem value="KG">
-              Kilogramos (kg)
-            </MenuItem>
-
-            <MenuItem value="UN">
-              Unidades
-            </MenuItem>
-
-            <MenuItem value="LT">
-              Litros (lt)
-            </MenuItem>
-
-          </TextField>
+        <TextField
+          margin="dense"
+          label="Categoría"
+          name="category"
+          fullWidth
+          value={form.category}
+          onChange={handleChange}
+        />
 
 
-          <TextField
-            label="Stock inicial"
-            name="stock"
-            type="number"
-            value={form.stock}
-            onChange={handleChange}
-          />
+        <TextField
+          select
+          margin="dense"
+          label="Unidad"
+          name="unit"
+          fullWidth
+          value={form.unit}
+          onChange={handleChange}
+        >
+
+          <MenuItem value="KG">
+            Kilogramos
+          </MenuItem>
+
+          <MenuItem value="UN">
+            Unidades
+          </MenuItem>
+
+          <MenuItem value="LT">
+            Litros
+          </MenuItem>
+
+        </TextField>
 
 
-          <TextField
-            label="Stock mínimo"
-            name="minStock"
-            type="number"
-            value={form.minStock}
-            onChange={handleChange}
-          />
+        <TextField
+          margin="dense"
+          label="Stock"
+          name="stock"
+          type="number"
+          fullWidth
+          value={form.stock}
+          onChange={handleChange}
+        />
 
 
-          <TextField
-            label="Costo"
-            name="cost"
-            type="number"
-            value={form.cost}
-            onChange={handleChange}
-          />
+        <TextField
+          margin="dense"
+          label="Stock mínimo"
+          name="minStock"
+          type="number"
+          fullWidth
+          value={form.minStock}
+          onChange={handleChange}
+        />
 
 
-          <TextField
-            label="Precio venta"
-            name="price"
-            type="number"
-            value={form.price}
-            onChange={handleChange}
-          />
+        <TextField
+          margin="dense"
+          label="Costo"
+          name="cost"
+          type="number"
+          fullWidth
+          value={form.cost}
+          onChange={handleChange}
+        />
 
-        </Stack>
+
+        <TextField
+          margin="dense"
+          label="Precio"
+          name="price"
+          type="number"
+          fullWidth
+          value={form.price}
+          onChange={handleChange}
+        />
+
 
       </DialogContent>
 
@@ -170,4 +223,5 @@ export default function ProductDialog({ open, onClose, onSave }) {
     </Dialog>
 
   );
+
 }

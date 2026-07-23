@@ -7,6 +7,7 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { esES } from "@mui/x-data-grid/locales";
 
 
 export default function ProductsTable({ products }) {
@@ -101,6 +102,9 @@ export default function ProductsTable({ products }) {
       <DataGrid
         rows={products}
         columns={columns}
+        localeText={
+  esES.components.MuiDataGrid.defaultProps.localeText
+}
         pageSizeOptions={[5, 10, 20]}
         initialState={{
           pagination: {
