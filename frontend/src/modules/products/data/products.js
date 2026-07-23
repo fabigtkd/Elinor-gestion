@@ -1,0 +1,48 @@
+const products = [
+  {
+    id: 1,
+    code: "P001",
+    name: "Pollo entero",
+    category: "Pollo",
+    unit: "kg",
+    stock: 120,
+    cost: 4200,
+    price: 5400,
+    active: true,
+  },
+  {
+    id: 2,
+    code: "P002",
+    name: "Pechuga",
+    category: "Corte",
+    unit: "kg",
+    stock: 35,
+    cost: 5800,
+    price: 7200,
+    active: true,
+  },
+  {
+    id: 3,
+    code: "P003",
+    name: "Muslo",
+    category: "Corte",
+    unit: "kg",
+    stock: 42,
+    cost: 5100,
+    price: 6500,
+    active: true,
+  },
+  {
+    id: 4,
+    code: "P004",
+    name: "Alitas",
+    category: "Corte",
+    unit: "kg",
+    stock: 18,
+    cost: 4600,
+    price: 6100,
+    active: true,
+  },
+];
+
+export default products;
