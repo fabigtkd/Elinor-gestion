@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import {
   getProducts,
   createProduct,
+  updateProduct,
 } from "./services/productsService";
 
 import ProductForm from "./components/ProductForm";
@@ -36,6 +37,8 @@ export default function Products() {
 
   const [showForm, setShowForm] = useState(false);
 
+  const [editingProduct, setEditingProduct] = useState(null);
+
 
 
   useEffect(() => {
@@ -48,20 +51,9 @@ export default function Products() {
 
   async function loadProducts() {
 
-    try {
+    const data = await getProducts();
 
-      const data = await getProducts();
-
-      setProducts(data);
-
-    } catch (error) {
-
-      console.error(
-        "Error cargando productos:",
-        error
-      );
-
-    }
+    setProducts(data);
 
   }
 
@@ -69,28 +61,59 @@ export default function Products() {
 
   async function handleCreate(product) {
 
-    try {
+    await createProduct(product);
 
-      await createProduct(product);
+    await loadProducts();
 
-      await loadProducts();
-
-      setShowForm(false);
-
-    } catch (error) {
-
-      console.error(
-        "Error creando producto:",
-        error
-      );
-
-    }
+    setShowForm(false);
 
   }
 
 
 
+
+  async function handleUpdate(product) {
+
+
+    await updateProduct(
+
+      product.id,
+
+      product
+
+    );
+
+
+    await loadProducts();
+
+
+    setEditingProduct(null);
+
+    setShowForm(false);
+
+
+  }
+
+
+
+
+
+  function handleEdit(product) {
+
+
+    setEditingProduct(product);
+
+    setShowForm(true);
+
+
+  }
+
+
+
+
+
   async function handleDelete(id) {
+
 
     const confirmDelete = window.confirm(
       "¿Eliminar este producto?"
@@ -98,44 +121,32 @@ export default function Products() {
 
 
     if (!confirmDelete) {
+
       return;
-    }
-
-
-    try {
-
-      await fetch(
-        `http://localhost:3001/api/products/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-
-      await loadProducts();
-
-
-    } catch (error) {
-
-      console.error(
-        "Error eliminando producto:",
-        error
-      );
 
     }
 
-  }
 
 
+    await fetch(
 
-  function handleEdit(product) {
+      `http://localhost:3001/api/products/${id}`,
 
-    console.log(
-      "Editar producto:",
-      product
+      {
+
+        method: "DELETE",
+
+      }
+
     );
 
+
+
+    await loadProducts();
+
+
   }
+
 
 
 
@@ -151,7 +162,7 @@ export default function Products() {
 
   return (
 
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p:3 }}>
 
 
       <Typography
@@ -177,12 +188,15 @@ export default function Products() {
 
         startIcon={<AddIcon />}
 
-        onClick={() => setShowForm(!showForm)}
+        onClick={() => {
 
-        sx={{
-          mt: 3,
-          mb: 3,
+          setEditingProduct(null);
+
+          setShowForm(!showForm);
+
         }}
+
+        sx={{ mt:3, mb:3 }}
 
       >
 
@@ -196,11 +210,20 @@ export default function Products() {
         showForm && (
 
           <ProductForm
-            onSave={handleCreate}
+
+            initialProduct={editingProduct}
+
+            onSave={
+              editingProduct
+              ? handleUpdate
+              : handleCreate
+            }
+
           />
 
         )
       }
+
 
 
 
@@ -212,15 +235,12 @@ export default function Products() {
 
         value={search}
 
-        onChange={(e) =>
-          setSearch(e.target.value)
-        }
+        onChange={(e)=>setSearch(e.target.value)}
 
-        sx={{
-          mb: 3,
-        }}
+        sx={{ mb:3 }}
 
       />
+
 
 
 
@@ -263,10 +283,11 @@ export default function Products() {
 
 
 
+
           <TableBody>
 
 
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product)=>(
 
 
               <TableRow key={product.id}>
@@ -297,6 +318,7 @@ export default function Products() {
                 </TableCell>
 
 
+
                 <TableCell align="center">
 
 
@@ -313,15 +335,19 @@ export default function Products() {
 
 
                   <IconButton
+
                     color="error"
+
                     onClick={() =>
                       handleDelete(product.id)
                     }
+
                   >
 
                     <DeleteIcon />
 
                   </IconButton>
+
 
 
                 </TableCell>

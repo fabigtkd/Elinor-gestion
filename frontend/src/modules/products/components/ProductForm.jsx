@@ -4,28 +4,58 @@ import {
   Box,
 } from "@mui/material";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+
+const emptyProduct = {
+
+  nombre: "",
+  categoria: "",
+  precio: "",
+  stock: "",
+  stockMinimo: "",
+  unidad: "kg",
+
+};
+
 
 
 export default function ProductForm({
+
   onSave,
+
+  initialProduct = null,
+
 }) {
 
 
-  const [product, setProduct] = useState({
 
-    nombre: "",
-    categoria: "",
-    precio: "",
-    stock: "",
-    stockMinimo: "",
-    unidad: "kg",
+  const [product, setProduct] = useState(emptyProduct);
 
-  });
+
+
+  useEffect(() => {
+
+
+    if (initialProduct) {
+
+      setProduct(initialProduct);
+
+    } else {
+
+      setProduct(emptyProduct);
+
+    }
+
+
+  }, [initialProduct]);
+
+
 
 
 
   function handleChange(e) {
+
 
     setProduct({
 
@@ -35,13 +65,19 @@ export default function ProductForm({
 
     });
 
+
   }
+
+
 
 
 
   function handleSubmit(e) {
 
+
     e.preventDefault();
+
+
 
     onSave({
 
@@ -56,90 +92,148 @@ export default function ProductForm({
     });
 
 
-    setProduct({
 
-      nombre: "",
-      categoria: "",
-      precio: "",
-      stock: "",
-      stockMinimo: "",
-      unidad: "kg",
+    if (!initialProduct) {
 
-    });
+      setProduct(emptyProduct);
+
+    }
+
 
   }
 
 
 
+
+
   return (
 
+
     <Box
+
       component="form"
+
       onSubmit={handleSubmit}
+
       sx={{
+
         display: "flex",
+
         flexDirection: "column",
+
         gap: 2,
+
         mb: 4,
+
       }}
+
     >
 
 
+
       <TextField
+
         label="Nombre"
+
         name="nombre"
+
         value={product.nombre}
+
         onChange={handleChange}
+
         required
+
       />
 
 
+
       <TextField
+
         label="Categoría"
+
         name="categoria"
+
         value={product.categoria}
+
         onChange={handleChange}
+
       />
 
 
+
       <TextField
+
         label="Precio"
+
         name="precio"
+
         type="number"
+
         value={product.precio}
+
         onChange={handleChange}
+
         required
+
       />
 
 
+
       <TextField
+
         label="Stock"
+
         name="stock"
+
         type="number"
+
         value={product.stock}
+
         onChange={handleChange}
+
       />
+
 
 
       <TextField
+
         label="Stock mínimo"
+
         name="stockMinimo"
+
         type="number"
+
         value={product.stockMinimo}
+
         onChange={handleChange}
+
       />
+
 
 
       <Button
+
         type="submit"
+
         variant="contained"
+
       >
-        Guardar producto
+
+        {
+          initialProduct
+            ? "Actualizar producto"
+            : "Guardar producto"
+        }
+
+
       </Button>
+
 
 
     </Box>
 
+
   );
+
 
 }
