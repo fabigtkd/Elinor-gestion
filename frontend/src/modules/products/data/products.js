@@ -1,4 +1,5 @@
 const products = [
+
   {
     id: 1,
     code: "P001",
@@ -6,10 +7,13 @@ const products = [
     category: "Pollo",
     unit: "kg",
     stock: 120,
+    minStock: 30,
     cost: 4200,
     price: 5400,
     active: true,
   },
+
+
   {
     id: 2,
     code: "P002",
@@ -17,10 +21,13 @@ const products = [
     category: "Corte",
     unit: "kg",
     stock: 35,
+    minStock: 10,
     cost: 5800,
     price: 7200,
     active: true,
   },
+
+
   {
     id: 3,
     code: "P003",
@@ -28,10 +35,13 @@ const products = [
     category: "Corte",
     unit: "kg",
     stock: 42,
+    minStock: 15,
     cost: 5100,
     price: 6500,
     active: true,
   },
+
+
   {
     id: 4,
     code: "P004",
@@ -39,10 +49,12 @@ const products = [
     category: "Corte",
     unit: "kg",
     stock: 18,
+    minStock: 20,
     cost: 4600,
     price: 6100,
     active: true,
   },
+
 ];
 
 export default products;

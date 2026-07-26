@@ -1,141 +1,344 @@
-import { Box, Typography } from "@mui/material";
-import { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+} from "@mui/material";
 
-import ProductsTable from "./components/ProductsTable";
-import ProductToolbar from "./components/ProductToolbar";
-import ProductDialog from "./components/ProductDialog";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-import productsData from "./data/products";
+import { useEffect, useState } from "react";
+
+import {
+  getProducts,
+  createProduct,
+} from "./services/productsService";
+
+import ProductForm from "./components/ProductForm";
 
 
 export default function Products() {
 
-  const [products, setProducts] = useState(() => {
 
-  const savedProducts =
-    localStorage.getItem("elinor_products");
-
-  if (savedProducts) {
-    return JSON.parse(savedProducts);
-  }
-
-  return productsData.map((product, index) => ({
-    ...product,
-    id: product.id || index + 1,
-  }));
-
-});
+  const [products, setProducts] = useState([]);
 
   const [search, setSearch] = useState("");
 
-  const [openDialog, setOpenDialog] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
-  const [productToEdit, setProductToEdit] = useState(null);
+
+
   useEffect(() => {
 
-  localStorage.setItem(
-    "elinor_products",
-    JSON.stringify(products)
-  );
-}, [products]);
+    loadProducts();
+
+  }, []);
 
 
-  const handleSaveProduct = (product) => {
-console.log("GUARDANDO PRODUCTO", product);
-    if (product.id) {
 
-      setProducts(
-        products.map((item) =>
-          item.id === product.id
-            ? product
-            : item
-        )
+  async function loadProducts() {
+
+    try {
+
+      const data = await getProducts();
+
+      setProducts(data);
+
+    } catch (error) {
+
+      console.error(
+        "Error cargando productos:",
+        error
       );
-
-    } else {
-
-      setProducts([
-        ...products,
-        {
-          ...product,
-          id: Date.now(),
-        },
-      ]);
 
     }
 
-    setOpenDialog(false);
-    setProductToEdit(null);
-
-  };
+  }
 
 
-  const handleDeleteProduct = (id) => {
 
-    setProducts(
-      products.filter(
-        (product) => product.id !== id
-      )
+  async function handleCreate(product) {
+
+    try {
+
+      await createProduct(product);
+
+      await loadProducts();
+
+      setShowForm(false);
+
+    } catch (error) {
+
+      console.error(
+        "Error creando producto:",
+        error
+      );
+
+    }
+
+  }
+
+
+
+  async function handleDelete(id) {
+
+    const confirmDelete = window.confirm(
+      "¿Eliminar este producto?"
     );
 
-  };
+
+    if (!confirmDelete) {
+      return;
+    }
 
 
-  const handleEditProduct = (product) => {
+    try {
 
-    setProductToEdit(product);
-    setOpenDialog(true);
+      await fetch(
+        `http://localhost:3001/api/products/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-  };
+
+      await loadProducts();
+
+
+    } catch (error) {
+
+      console.error(
+        "Error eliminando producto:",
+        error
+      );
+
+    }
+
+  }
+
+
+
+  function handleEdit(product) {
+
+    console.log(
+      "Editar producto:",
+      product
+    );
+
+  }
+
 
 
   const filteredProducts = products.filter((product) =>
-    product.name
+
+    product.nombre
       .toLowerCase()
       .includes(search.toLowerCase())
+
   );
+
 
 
   return (
 
-    <Box>
+    <Box sx={{ p: 3 }}>
+
 
       <Typography
         variant="h4"
         fontWeight="bold"
-        sx={{ mb: 3 }}
       >
-        Productos y Stock
+        Productos
       </Typography>
 
 
-      <ProductToolbar
-        search={search}
-        setSearch={setSearch}
-        onNewProduct={() => {
-          setProductToEdit(null);
-          setOpenDialog(true);
+
+      <Typography color="text.secondary">
+
+        Gestión de productos y costos de Elinor Pollos
+
+      </Typography>
+
+
+
+      <Button
+
+        variant="contained"
+
+        startIcon={<AddIcon />}
+
+        onClick={() => setShowForm(!showForm)}
+
+        sx={{
+          mt: 3,
+          mb: 3,
         }}
-      />
+
+      >
+
+        Nuevo producto
+
+      </Button>
 
 
-      <ProductsTable
-        products={
-          filteredProducts.map((product) => ({
-            ...product,
-            onEdit: handleEditProduct,
-            onDelete: handleDeleteProduct,
-          }))
+
+      {
+        showForm && (
+
+          <ProductForm
+            onSave={handleCreate}
+          />
+
+        )
+      }
+
+
+
+      <TextField
+
+        fullWidth
+
+        label="Buscar producto"
+
+        value={search}
+
+        onChange={(e) =>
+          setSearch(e.target.value)
         }
+
+        sx={{
+          mb: 3,
+        }}
+
       />
 
 
-      <ProductDialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        onSave={handleSaveProduct}
-        productToEdit={productToEdit}
-      />
+
+      <TableContainer component={Paper}>
+
+        <Table>
+
+
+          <TableHead>
+
+            <TableRow>
+
+              <TableCell>
+                Producto
+              </TableCell>
+
+              <TableCell>
+                Categoría
+              </TableCell>
+
+              <TableCell>
+                Precio
+              </TableCell>
+
+              <TableCell>
+                Stock
+              </TableCell>
+
+              <TableCell>
+                Unidad
+              </TableCell>
+
+              <TableCell align="center">
+                Acciones
+              </TableCell>
+
+            </TableRow>
+
+          </TableHead>
+
+
+
+          <TableBody>
+
+
+            {filteredProducts.map((product) => (
+
+
+              <TableRow key={product.id}>
+
+
+                <TableCell>
+                  {product.nombre}
+                </TableCell>
+
+
+                <TableCell>
+                  {product.categoria}
+                </TableCell>
+
+
+                <TableCell>
+                  ${product.precio}
+                </TableCell>
+
+
+                <TableCell>
+                  {product.stock}
+                </TableCell>
+
+
+                <TableCell>
+                  {product.unidad}
+                </TableCell>
+
+
+                <TableCell align="center">
+
+
+                  <IconButton
+                    onClick={() =>
+                      handleEdit(product)
+                    }
+                  >
+
+                    <EditIcon />
+
+                  </IconButton>
+
+
+
+                  <IconButton
+                    color="error"
+                    onClick={() =>
+                      handleDelete(product.id)
+                    }
+                  >
+
+                    <DeleteIcon />
+
+                  </IconButton>
+
+
+                </TableCell>
+
+
+              </TableRow>
+
+
+            ))}
+
+
+          </TableBody>
+
+
+        </Table>
+
+      </TableContainer>
 
 
     </Box>

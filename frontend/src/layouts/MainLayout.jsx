@@ -1,101 +1,248 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+
 import {
-  AppBar,
-  Toolbar,
-  Typography,
+  Box,
   Drawer,
   List,
+  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Box,
+  Typography,
 } from "@mui/material";
 
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import PeopleIcon from "@mui/icons-material/People";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import FactoryIcon from "@mui/icons-material/Factory";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import FactoryIcon from "@mui/icons-material/Factory";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import AssessmentIcon from "@mui/icons-material/Assessment";
 import SettingsIcon from "@mui/icons-material/Settings";
 
-const drawerWidth = 260;
+import elinorLogo from "../assets/elinor-logo.png";
 
-const menuItems = [
-  { text: "Dashboard", path: "/", icon: <DashboardIcon /> },
-  { text: "Clientes", path: "/clientes", icon: <PeopleIcon /> },
-  { text: "Productos", path: "/productos", icon: <InventoryIcon /> },
-  { text: "Compras", path: "/compras", icon: <ShoppingCartIcon /> },
-  { text: "Producción", path: "/produccion", icon: <FactoryIcon /> },
-  { text: "Costos", path: "/costos", icon: <AttachMoneyIcon /> },
-  { text: "Ventas", path: "/ventas", icon: <PointOfSaleIcon /> },
-  { text: "Reportes", path: "/reportes", icon: <AssessmentIcon /> },
-  { text: "Configuración", path: "/configuracion", icon: <SettingsIcon /> },
+const menu = [
+  {
+    text: "Dashboard",
+    icon: <DashboardIcon />,
+    path: "/",
+  },
+  {
+    text: "Productos",
+    icon: <InventoryIcon />,
+    path: "/productos",
+  },
+  {
+    text: "Costos",
+    icon: <AttachMoneyIcon />,
+    path: "/costos",
+  },
+  {
+    text: "Producción",
+    icon: <FactoryIcon />,
+    path: "/produccion",
+  },
+  {
+    text: "Ventas",
+    icon: <ShoppingCartIcon />,
+    path: "/ventas",
+  },
+  {
+    text: "Caja",
+    icon: <PointOfSaleIcon />,
+    path: "/caja",
+  },
+  {
+    text: "Configuración",
+    icon: <SettingsIcon />,
+    path: "/configuracion",
+  },
 ];
 
 export default function MainLayout() {
+  const navigate = useNavigate();
+
   return (
-    <Box sx={{ display: "flex" }}>
-
-      <AppBar
-        position="fixed"
-        sx={{
-          backgroundColor: "#111827",
-          zIndex: 1201,
-        }}
-      >
-        <Toolbar>
-          <Typography
-            variant="h6"
-            sx={{
-              color: "#f59e0b",
-              fontWeight: "bold",
-            }}
-          >
-            ELINOR GESTIÓN
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        backgroundColor: "#000000",
+      }}
+    >
 
       <Drawer
         variant="permanent"
         sx={{
-          width: drawerWidth,
+          width: 290,
 
           "& .MuiDrawer-paper": {
-            width: drawerWidth,
-            backgroundColor: "#1f2937",
-            color: "white",
+            width: 290,
+            boxSizing: "border-box",
+
+            backgroundColor: "#000000",
+            color: "#FAFAFA",
+
+            borderRight:
+              "1px solid rgba(212,167,44,0.25)",
           },
         }}
       >
 
-        <Toolbar />
+        <Box
+          sx={{
+            height: 230,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
 
-        <List>
+          <Box
+            sx={{
+              width: 125,
+              height: 125,
+              borderRadius: "50%",
 
-          {menuItems.map((item) => (
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
 
-  <ListItemButton
-    key={item.text}
-    component="a"
-    href={item.path}
-  >
+              backgroundColor: "#111111",
 
-              <ListItemIcon
+              border:
+                "3px solid #D4A72C",
+
+              boxShadow:
+                "0 0 22px rgba(212,167,44,0.45)",
+
+              overflow: "hidden",
+              mb: 2,
+            }}
+          >
+
+            <Box
+              component="img"
+              src={elinorLogo}
+              alt="Elinor Gestión"
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+              }}
+            />
+
+          </Box>
+
+
+          <Typography
+            sx={{
+              color: "#D4A72C",
+
+              fontSize: "2rem",
+              fontWeight: 500,
+
+              letterSpacing: 1.5,
+              lineHeight: 1,
+
+              fontFamily:
+                "'Playfair Display', Georgia, serif",
+            }}
+          >
+            Elinor
+          </Typography>
+
+
+          <Typography
+            sx={{
+              color: "#FAFAFA",
+
+              fontSize: "0.95rem",
+              fontWeight: 500,
+
+              letterSpacing: 4,
+              mt: 0.7,
+
+              fontFamily:
+                "Montserrat, Arial, sans-serif",
+            }}
+          >
+            GESTIÓN
+          </Typography>
+
+        </Box>
+
+
+        <List sx={{ px: 1.5 }}>
+
+          {menu.map((item) => (
+
+            <ListItem
+              key={item.text}
+              disablePadding
+              sx={{
+                mb: 0.5,
+              }}
+            >
+
+              <ListItemButton
+                onClick={() => navigate(item.path)}
+
                 sx={{
-                  color: "#f59e0b",
+
+                  borderRadius: 2,
+
+                  color: "#FAFAFA",
+
+                  transition:
+                    "0.25s",
+
+                  "&:hover": {
+
+                    backgroundColor:
+                      "rgba(212,167,44,0.15)",
+
+                    transform:
+                      "translateX(5px)",
+                  },
+
+
+                  "& .MuiListItemIcon-root": {
+
+                    color:
+                      "#D4A72C",
+
+                    minWidth:
+                      42,
+                  },
+
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
 
-              <ListItemText primary={item.text} />
+                <ListItemIcon>
+                  {item.icon}
+                </ListItemIcon>
 
-            </ListItemButton>
+
+                <ListItemText
+
+                  primary={item.text}
+
+                  primaryTypographyProps={{
+
+                    fontWeight: 600,
+
+                    letterSpacing:
+                      0.5,
+
+                  }}
+
+                />
+
+              </ListItemButton>
+
+            </ListItem>
 
           ))}
 
@@ -106,17 +253,25 @@ export default function MainLayout() {
 
       <Box
         component="main"
+
         sx={{
+
           flexGrow: 1,
+
           p: 3,
-          mt: 8,
+
+          backgroundColor:
+            "#000000",
+
+          minHeight:
+            "100vh",
+
         }}
       >
 
         <Outlet />
 
       </Box>
-
 
     </Box>
   );

@@ -1,100 +1,300 @@
 import {
   Grid,
-  Card,
-  CardContent,
   Typography,
   Box,
+  Button,
 } from "@mui/material";
 
-const indicators = [
-  {
-    title: "Ventas del día",
-    value: "$ 0",
-    description: "Facturación actual",
-  },
-  {
-    title: "Compras pendientes",
-    value: "0",
-    description: "Pedidos por recibir",
-  },
-  {
-    title: "Stock disponible",
-    value: "0 kg",
-    description: "Producto en cámara",
-  },
-  {
-    title: "Rentabilidad",
-    value: "0 %",
-    description: "Margen estimado",
-  },
-];
+
+import InventoryIcon from "@mui/icons-material/Inventory";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+
+
+import StatCard from "../../components/StatCard";
+import DashboardHeader from "../../components/DashboardHeader";
+
+
+import productsData from "../products/data/products";
+
+
 
 export default function Dashboard() {
+
+
+  const products =
+    JSON.parse(
+      localStorage.getItem("elinor_products")
+    ) || productsData;
+
+
+
+  const totalProductos =
+    products.length;
+
+
+
+
+  const cards = [
+
+
+    {
+      title:"Ventas",
+      value:"$ 0",
+      color:"#D4A72C",
+      icon:<PointOfSaleIcon />,
+    },
+
+
+    {
+      title:"Caja",
+      value:"$ 0",
+      color:"#D4A72C",
+      icon:<AccountBalanceWalletIcon />,
+    },
+
+
+    {
+      title:"Compras",
+      value:"$ 0",
+      color:"#D4A72C",
+      icon:<ShoppingCartIcon />,
+    },
+
+
+    {
+      title:"Productos",
+      value:totalProductos,
+      color:"#D4A72C",
+      icon:<InventoryIcon />,
+    },
+
+
+  ];
+
+
+
+
+
+  const quickActions = [
+
+
+    {
+      text:"Nueva venta",
+      icon:<PointOfSaleIcon />,
+    },
+
+
+    {
+      text:"Cierre de caja",
+      icon:<AccountBalanceWalletIcon />,
+    },
+
+
+    {
+      text:"Stock",
+      icon:<InventoryIcon />,
+    },
+
+
+    {
+      text:"Reportes",
+      icon:<AssessmentIcon />,
+    },
+
+
+  ];
+
+
+
+
+
   return (
+
     <Box>
 
+
+      <DashboardHeader />
+
+
+
       <Typography
-        variant="h4"
+
+        variant="h6"
+
         sx={{
-          mb: 3,
-          fontWeight: "bold",
+
+          mb:2,
+
+          fontWeight:600,
+
+          color:"#FAFAFA",
+
+          letterSpacing:0.5,
+
         }}
+
       >
-        Dashboard Elinor Gestión
+
+        Resumen del negocio
+
       </Typography>
 
 
-      <Grid container spacing={3}>
 
-        {indicators.map((item) => (
 
-          <Grid item xs={12} md={3} key={item.title}>
+      <Grid
 
-            <Card
-              sx={{
-                height: "100%",
-              }}
+        container
+
+        spacing={3}
+
+      >
+
+        {
+          cards.map((card)=>(
+
+            <Grid
+
+              size={{xs:12, md:3}}
+
+              key={card.title}
+
             >
 
-              <CardContent>
+              <StatCard
 
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                >
-                  {item.title}
-                </Typography>
+                title={card.title}
 
+                value={card.value}
 
-                <Typography
-                  variant="h4"
-                  sx={{
-                    mt: 2,
-                    fontWeight: "bold",
-                  }}
-                >
-                  {item.value}
-                </Typography>
+                color={card.color}
+
+                icon={card.icon}
+
+              />
 
 
-                <Typography
-                  sx={{
-                    mt: 1,
-                  }}
-                >
-                  {item.description}
-                </Typography>
+            </Grid>
 
-              </CardContent>
 
-            </Card>
+          ))
+        }
 
-          </Grid>
-
-        ))}
 
       </Grid>
 
+
+
+
+
+      <Grid
+
+        container
+
+        spacing={2}
+
+        sx={{
+
+          mt:3,
+
+        }}
+
+      >
+
+
+        {
+          quickActions.map((item)=>(
+
+
+            <Grid
+
+              size={{xs:12, md:3}}
+
+              key={item.text}
+
+            >
+
+
+              <Button
+
+
+                fullWidth
+
+
+                variant="outlined"
+
+
+                startIcon={item.icon}
+
+
+
+                sx={{
+
+
+                  height:48,
+
+
+                  color:"#D4A72C",
+
+
+                  borderColor:"#D4A72C",
+
+
+                  fontWeight:600,
+
+
+                  letterSpacing:0.5,
+
+
+                  backgroundColor:
+                    "rgba(212,167,44,0.05)",
+
+
+
+                  "&:hover":{
+
+
+                    backgroundColor:"#D4A72C",
+
+
+                    color:"#000000",
+
+
+                    borderColor:"#D4A72C",
+
+
+                  },
+
+
+                }}
+
+
+              >
+
+                {item.text}
+
+
+              </Button>
+
+
+            </Grid>
+
+
+          ))
+        }
+
+
+      </Grid>
+
+
+
     </Box>
+
   );
+
+
 }
