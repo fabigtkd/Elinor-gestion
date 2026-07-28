@@ -1,139 +1,515 @@
 import {
   Box,
   Typography,
-  Grid,
-  Card,
-  CardActionArea,
+  TextField,
+  Button,
+  MenuItem,
   CardContent,
 } from "@mui/material";
 
-import AgricultureIcon from "@mui/icons-material/Agriculture";
-import EggIcon from "@mui/icons-material/Egg";
-import AcUnitIcon from "@mui/icons-material/AcUnit";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import LunchDiningIcon from "@mui/icons-material/LunchDining";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
-import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
-import CategoryIcon from "@mui/icons-material/Category";
 
-const opciones = [
-  {
-    titulo: "Pollo entero",
-    icono: <AgricultureIcon sx={{ fontSize: 55 }} />,
-    color: "#FFF8E1",
-  },
-  {
-    titulo: "Pechuga",
-    icono: <LunchDiningIcon sx={{ fontSize: 55 }} />,
-    color: "#F1F8E9",
-  },
-  {
-    titulo: "Pata / Muslo",
-    icono: <RestaurantIcon sx={{ fontSize: 55 }} />,
-    color: "#FCE4EC",
-  },
-  {
-    titulo: "Congelados",
-    icono: <AcUnitIcon sx={{ fontSize: 55 }} />,
-    color: "#E3F2FD",
-  },
-  {
-    titulo: "Huevos",
-    icono: <EggIcon sx={{ fontSize: 55 }} />,
-    color: "#FFFDE7",
-  },
-  {
-    titulo: "Quesos",
-    icono: <ShoppingBasketIcon sx={{ fontSize: 55 }} />,
-    color: "#FFF3E0",
-  },
-  {
-    titulo: "Insumos",
-    icono: <Inventory2Icon sx={{ fontSize: 55 }} />,
-    color: "#ECEFF1",
-  },
-  {
-    titulo: "Otros",
-    icono: <CategoryIcon sx={{ fontSize: 55 }} />,
-    color: "#F3E5F5",
-  },
-];
+import { useState } from "react";
+
+
+import { createCompra } from "./comprasService";
+
+
+import ModuleHeader from "../../components/ModuleHeader";
+
+import ElinorCard from "../../components/ElinorCard";
+
+
+
 
 export default function Compras() {
+
+
+
+  const [compra, setCompra] = useState({
+
+
+    tipo: "Compra",
+
+    producto: "Cajón pollo",
+
+    cantidad: "",
+
+    unidad: "unidad",
+
+    costoUnitario: "",
+
+    merma: 0,
+
+
+  });
+
+
+
+
+
+  function handleChange(e) {
+
+
+    setCompra({
+
+      ...compra,
+
+      [e.target.name]: e.target.value,
+
+    });
+
+
+  }
+
+
+
+
+
+
+  async function guardarCompra() {
+
+
+
+    const nuevaCompra = {
+
+
+      ...compra,
+
+
+      cantidad:
+        Number(compra.cantidad),
+
+
+      costoUnitario:
+        Number(compra.costoUnitario),
+
+
+
+      costoTotal:
+
+        Number(compra.cantidad) *
+
+        Number(compra.costoUnitario),
+
+
+
+      merma:
+        Number(compra.merma),
+
+
+    };
+
+
+
+
+    try {
+
+
+      const resultado =
+        await createCompra(nuevaCompra);
+
+
+
+      console.log(
+        "Compra guardada:",
+        resultado
+      );
+
+
+
+      alert(
+        "Compra registrada correctamente"
+      );
+
+
+
+    } catch(error) {
+
+
+      console.error(error);
+
+
+
+      alert(
+        "Error guardando compra"
+      );
+
+
+    }
+
+
+  }
+
+
+
+
+
+
+  const total =
+
+    Number(compra.cantidad || 0) *
+
+    Number(compra.costoUnitario || 0);
+
+
+
+
+
+
   return (
+
+
+
     <Box>
 
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: 700,
-          mb: 1,
-        }}
-      >
-        Ingreso de Mercadería
-      </Typography>
 
-      <Typography
-        color="text.secondary"
-        sx={{
-          mb: 4,
-        }}
-      >
-        ¿Qué recibiste hoy?
-      </Typography>
+      <ModuleHeader
 
-      <Grid container spacing={3}>
+        title="Ingreso de Mercadería"
 
-        {opciones.map((item) => (
+        subtitle="Registro de compras y costos de materia prima"
 
-          <Grid item xs={12} sm={6} md={3} key={item.titulo}>
+      />
 
-            <Card
-              elevation={3}
+
+
+
+
+
+      <ElinorCard>
+
+
+        <CardContent
+
+          sx={{
+
+            p:4,
+
+            maxWidth:550,
+
+          }}
+
+        >
+
+
+
+
+          <TextField
+
+
+            select
+
+            fullWidth
+
+            label="Producto"
+
+            name="producto"
+
+            value={compra.producto}
+
+            onChange={handleChange}
+
+            sx={{mb:2}}
+
+
+          >
+
+
+            <MenuItem value="Cajón pollo">
+
+              Cajón pollo
+
+            </MenuItem>
+
+
+
+            <MenuItem value="Pechuga">
+
+              Pechuga
+
+            </MenuItem>
+
+
+
+            <MenuItem value="Pata muslo">
+
+              Pata muslo
+
+            </MenuItem>
+
+
+
+            <MenuItem value="Congelados">
+
+              Congelados
+
+            </MenuItem>
+
+
+
+          </TextField>
+
+
+
+
+
+
+
+
+          <TextField
+
+
+            fullWidth
+
+            label="Cantidad"
+
+            name="cantidad"
+
+            type="number"
+
+            value={compra.cantidad}
+
+            onChange={handleChange}
+
+            sx={{mb:2}}
+
+
+          />
+
+
+
+
+
+
+
+          <TextField
+
+
+            select
+
+            fullWidth
+
+            label="Unidad"
+
+            name="unidad"
+
+            value={compra.unidad}
+
+            onChange={handleChange}
+
+            sx={{mb:2}}
+
+
+          >
+
+
+            <MenuItem value="unidad">
+
+              Unidad
+
+            </MenuItem>
+
+
+
+            <MenuItem value="kg">
+
+              Kilogramos
+
+            </MenuItem>
+
+
+
+          </TextField>
+
+
+
+
+
+
+
+
+          <TextField
+
+
+            fullWidth
+
+            label="Costo unitario"
+
+            name="costoUnitario"
+
+            type="number"
+
+            value={compra.costoUnitario}
+
+            onChange={handleChange}
+
+            sx={{mb:2}}
+
+
+          />
+
+
+
+
+
+
+
+          <TextField
+
+
+            fullWidth
+
+            label="Merma %"
+
+            name="merma"
+
+            type="number"
+
+            value={compra.merma}
+
+            onChange={handleChange}
+
+            sx={{mb:3}}
+
+
+          />
+
+
+
+
+
+
+
+
+          <Box
+
+            sx={{
+
+              p:2,
+
+              mb:3,
+
+              borderRadius:2,
+
+              backgroundColor:"#000000",
+
+              border:
+
+              "1px solid rgba(212,167,44,0.25)",
+
+            }}
+
+          >
+
+
+            <Typography
+
               sx={{
-                borderRadius: 4,
-                backgroundColor: item.color,
-                height: "100%",
+
+                color:"#D4A72C",
+
+                fontWeight:700,
+
               }}
+
             >
 
-              <CardActionArea
-                sx={{
-                  height: "100%",
-                }}
-              >
+              Total compra:
 
-                <CardContent
-                  sx={{
-                    textAlign: "center",
-                    py: 5,
-                  }}
-                >
+            </Typography>
 
-                  {item.icono}
 
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      mt: 2,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {item.titulo}
-                  </Typography>
 
-                </CardContent>
+            <Typography
 
-              </CardActionArea>
+              variant="h5"
 
-            </Card>
+              sx={{
 
-          </Grid>
+                color:"#FAFAFA",
 
-        ))}
+                fontWeight:700,
 
-      </Grid>
+              }}
+
+            >
+
+              ${total.toLocaleString("es-AR")}
+
+            </Typography>
+
+
+
+          </Box>
+
+
+
+
+
+
+
+          <Button
+
+
+            variant="contained"
+
+
+            fullWidth
+
+
+            onClick={guardarCompra}
+
+
+            sx={{
+
+
+              backgroundColor:"#D4A72C",
+
+
+              color:"#000000",
+
+
+              fontWeight:700,
+
+
+
+              "&:hover":{
+
+                backgroundColor:"#B89020",
+
+              },
+
+
+            }}
+
+
+
+          >
+
+
+            Guardar compra
+
+
+          </Button>
+
+
+
+
+
+        </CardContent>
+
+
+      </ElinorCard>
+
+
+
+
 
     </Box>
+
+
   );
+
+
+
 }

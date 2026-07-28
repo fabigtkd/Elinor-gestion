@@ -56,7 +56,6 @@ export default function StatCard({
     >
 
 
-
       <CardContent
 
         sx={{
@@ -68,17 +67,19 @@ export default function StatCard({
       >
 
 
-
         <Box
 
-          display="flex"
+          sx={{
 
-          justifyContent="space-between"
+            display:"flex",
 
-          alignItems="flex-start"
+            justifyContent:"space-between",
+
+            alignItems:"flex-start",
+
+          }}
 
         >
-
 
 
           <Box>
@@ -132,7 +133,6 @@ export default function StatCard({
 
 
 
-
           <Box
 
             sx={{
@@ -162,7 +162,6 @@ export default function StatCard({
           >
 
             {icon}
-
 
           </Box>
 

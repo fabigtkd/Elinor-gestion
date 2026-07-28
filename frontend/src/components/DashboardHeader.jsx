@@ -40,18 +40,21 @@ export default function DashboardHeader() {
 
       <Box
 
-        display="flex"
+        sx={{
 
-        justifyContent="space-between"
+          display:"flex",
 
-        alignItems="center"
+          justifyContent:"space-between",
 
-        flexWrap="wrap"
+          alignItems:"center",
 
-        gap={2}
+          flexWrap:"wrap",
+
+          gap:2,
+
+        }}
 
       >
-
 
 
         <Box>
@@ -110,11 +113,15 @@ export default function DashboardHeader() {
 
         <Box
 
-          display="flex"
+          sx={{
 
-          alignItems="center"
+            display:"flex",
 
-          gap={1}
+            alignItems:"center",
+
+            gap:1,
+
+          }}
 
         >
 
