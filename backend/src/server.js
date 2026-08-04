@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 require("./database/init");
-
+require("./database/migrateCompras");
 const app = express();
 
 app.use(cors());
@@ -18,6 +18,10 @@ const productsRoutes = require("./modules/products/products.routes");
 const costosRoutes = require("./modules/costos/costos.routes");
 const materiasPrimasRoutes = require("./modules/materiasPrimas/materiasPrimas.routes");
 const comprasRoutes = require("./modules/compras/compras.routes");
+console.log(
+  "COMPRAS ROUTES CARGADO DESDE:",
+  require.resolve("./modules/compras/compras.routes")
+);
 const proveedoresRoutes = require("./modules/proveedores/proveedores.routes");
 
 
@@ -71,7 +75,15 @@ app.get("/", (req, res) => {
 
 const PORT = 3001;
 
+app.put("/api/test-put", (req,res)=>{
 
+  console.log("🔥 TEST PUT FUNCIONANDO");
+
+  res.json({
+    ok:true
+  });
+
+});
 
 app.listen(PORT, () => {
 

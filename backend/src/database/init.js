@@ -1,6 +1,8 @@
 const db = require("./connection");
 
+
 db.serialize(() => {
+
 
   // ==========================
   // PROVEEDORES
@@ -35,7 +37,67 @@ db.serialize(() => {
 
 
   // ==========================
-  // COMPRAS (CABECERA)
+  // MOVIMIENTOS PROVEEDORES
+  // ==========================
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS movimientos_proveedores (
+
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      proveedorId INTEGER NOT NULL,
+
+      fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+      tipo TEXT NOT NULL,
+
+      descripcion TEXT,
+
+      debe REAL DEFAULT 0,
+
+      haber REAL DEFAULT 0,
+
+      saldo REAL DEFAULT 0,
+
+      referenciaId INTEGER,
+
+      FOREIGN KEY(proveedorId)
+      REFERENCES proveedores(id)
+
+    )
+  `);
+
+
+
+  // ==========================
+  // PAGOS PROVEEDORES
+  // ==========================
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS pagos_proveedores (
+
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      proveedorId INTEGER NOT NULL,
+
+      fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+      importe REAL NOT NULL,
+
+      medioPago TEXT,
+
+      observaciones TEXT,
+
+      FOREIGN KEY(proveedorId)
+      REFERENCES proveedores(id)
+
+    )
+  `);
+
+
+
+  // ==========================
+  // COMPRAS
   // ==========================
 
   db.run(`
@@ -46,6 +108,8 @@ db.serialize(() => {
       proveedorId INTEGER NOT NULL,
 
       fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+      remito TEXT,
 
       observaciones TEXT,
 
@@ -70,7 +134,68 @@ db.serialize(() => {
 
 
   // ==========================
-  // DETALLE DE COMPRA
+  // MATERIAS PRIMAS
+  // ==========================
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS materias_primas (
+
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      codigo TEXT,
+
+      nombre TEXT NOT NULL UNIQUE,
+
+      categoria TEXT,
+
+      unidad TEXT DEFAULT 'kg',
+
+      rendimiento REAL DEFAULT 100,
+
+      costoActual REAL DEFAULT 0,
+
+      costoAnterior REAL DEFAULT 0,
+
+      activo INTEGER DEFAULT 1,
+
+      fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+
+    )
+  `);
+
+
+
+  // ==========================
+  // ORIGENES MATERIA PRIMA
+  // ==========================
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS origenes_materia_prima (
+
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      materiaPrimaId INTEGER NOT NULL,
+
+      tipoOrigen TEXT NOT NULL,
+
+      documentoOrigen INTEGER,
+
+      cantidad REAL DEFAULT 0,
+
+      costoUnitario REAL DEFAULT 0,
+
+      fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+      FOREIGN KEY(materiaPrimaId)
+      REFERENCES materias_primas(id)
+
+    )
+  `);
+
+
+
+  // ==========================
+  // DETALLE COMPRAS
   // ==========================
 
   db.run(`
@@ -80,7 +205,9 @@ db.serialize(() => {
 
       compraId INTEGER NOT NULL,
 
-      producto TEXT NOT NULL,
+      materiaPrimaId INTEGER,
+
+      producto TEXT,
 
       cantidad REAL NOT NULL,
 
@@ -91,7 +218,10 @@ db.serialize(() => {
       subtotal REAL NOT NULL,
 
       FOREIGN KEY(compraId)
-      REFERENCES compras(id)
+      REFERENCES compras(id),
+
+      FOREIGN KEY(materiaPrimaId)
+      REFERENCES materias_primas(id)
 
     )
   `);
@@ -99,7 +229,7 @@ db.serialize(() => {
 
 
   // ==========================
-  // PRODUCTOS
+  // PRODUCTOS TERMINADOS
   // ==========================
 
   db.run(`
@@ -111,13 +241,45 @@ db.serialize(() => {
 
       categoria TEXT,
 
-      precio REAL NOT NULL,
+      precio REAL DEFAULT 0,
 
       stock REAL DEFAULT 0,
 
       stockMinimo REAL DEFAULT 0,
 
       unidad TEXT DEFAULT 'kg'
+
+    )
+  `);
+
+
+
+  // ==========================
+  // MOVIMIENTOS STOCK
+  // ==========================
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS stock_movimientos (
+
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+      productoId INTEGER,
+
+      materiaPrimaId INTEGER,
+
+      tipo TEXT NOT NULL,
+
+      cantidad REAL NOT NULL,
+
+      referenciaId INTEGER,
+
+      fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+      FOREIGN KEY(productoId)
+      REFERENCES productos(id),
+
+      FOREIGN KEY(materiaPrimaId)
+      REFERENCES materias_primas(id)
 
     )
   `);
@@ -137,11 +299,11 @@ db.serialize(() => {
 
       unidad TEXT,
 
-      costoBase REAL,
+      costoBase REAL DEFAULT 0,
 
-      margen REAL,
+      margen REAL DEFAULT 0,
 
-      precioSugerido REAL,
+      precioSugerido REAL DEFAULT 0,
 
       fecha DATETIME DEFAULT CURRENT_TIMESTAMP
 
@@ -161,13 +323,11 @@ db.serialize(() => {
 
       nombre TEXT NOT NULL,
 
-      unidad TEXT,
+      costoBase REAL DEFAULT 0,
 
-      costoBase REAL,
+      margen REAL DEFAULT 0,
 
-      margen REAL,
-
-      precioSugerido REAL,
+      precioSugerido REAL DEFAULT 0,
 
       fecha DATETIME DEFAULT CURRENT_TIMESTAMP
 
@@ -176,36 +336,12 @@ db.serialize(() => {
 
 
 
-  // ==========================
-  // MATERIAS PRIMAS
-  // ==========================
+  console.log(
+    "✅ Base de datos Elinor Gestión inicializada."
+  );
 
-  db.run(`
-    CREATE TABLE IF NOT EXISTS materias_primas (
-
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-      nombre TEXT NOT NULL UNIQUE,
-
-      origen TEXT,
-
-      unidad TEXT DEFAULT 'kg',
-
-      costoActual REAL DEFAULT 0,
-
-      rendimiento REAL DEFAULT 100,
-
-      merma REAL DEFAULT 0,
-
-      fecha DATETIME DEFAULT CURRENT_TIMESTAMP
-
-    )
-  `);
-
-
-
-  console.log("✅ Base de datos inicializada.");
 
 });
+
 
 module.exports = db;

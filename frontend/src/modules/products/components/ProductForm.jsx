@@ -2,6 +2,9 @@ import {
   TextField,
   Button,
   Box,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 
 import { useEffect, useState } from "react";
@@ -16,7 +19,20 @@ const emptyProduct = {
   stockMinimo: "",
   unidad: "kg",
 
+  tipo: "producto",
+
+  controlaStock: false,
+
+  esMateriaPrima: false,
+
+  esElaborado: false,
+
+  tieneReceta: false,
+
+  margen: "",
+
 };
+
 
 
 
@@ -29,7 +45,6 @@ export default function ProductForm({
 }) {
 
 
-
   const [product, setProduct] = useState(emptyProduct);
 
 
@@ -37,9 +52,16 @@ export default function ProductForm({
   useEffect(() => {
 
 
-    if (initialProduct) {
+    if(initialProduct){
 
-      setProduct(initialProduct);
+      setProduct({
+
+        ...emptyProduct,
+
+        ...initialProduct,
+
+      });
+
 
     } else {
 
@@ -54,7 +76,9 @@ export default function ProductForm({
 
 
 
-  function handleChange(e) {
+
+
+  function handleChange(e){
 
 
     setProduct({
@@ -72,7 +96,29 @@ export default function ProductForm({
 
 
 
-  function handleSubmit(e) {
+
+
+  function handleCheck(e){
+
+
+    setProduct({
+
+      ...product,
+
+      [e.target.name]: e.target.checked,
+
+    });
+
+
+  }
+
+
+
+
+
+
+
+  function handleSubmit(e){
 
 
     e.preventDefault();
@@ -83,17 +129,21 @@ export default function ProductForm({
 
       ...product,
 
-      precio: Number(product.precio),
 
-      stock: Number(product.stock),
+      precio: Number(product.precio || 0),
 
-      stockMinimo: Number(product.stockMinimo),
+      stock: Number(product.stock || 0),
+
+      stockMinimo: Number(product.stockMinimo || 0),
+
+      margen: Number(product.margen || 0),
+
 
     });
 
 
 
-    if (!initialProduct) {
+    if(!initialProduct){
 
       setProduct(emptyProduct);
 
@@ -106,8 +156,9 @@ export default function ProductForm({
 
 
 
-  return (
 
+
+  return (
 
     <Box
 
@@ -117,13 +168,13 @@ export default function ProductForm({
 
       sx={{
 
-        display: "flex",
+        display:"flex",
 
-        flexDirection: "column",
+        flexDirection:"column",
 
-        gap: 2,
+        gap:2,
 
-        mb: 4,
+        mb:4,
 
       }}
 
@@ -147,6 +198,7 @@ export default function ProductForm({
 
 
 
+
       <TextField
 
         label="Categoría"
@@ -161,9 +213,111 @@ export default function ProductForm({
 
 
 
+
       <TextField
 
-        label="Precio"
+        select
+
+        label="Unidad"
+
+        name="unidad"
+
+        value={product.unidad}
+
+        onChange={handleChange}
+
+      >
+
+        <MenuItem value="kg">
+
+          Kilogramo
+
+        </MenuItem>
+
+
+        <MenuItem value="unidad">
+
+          Unidad
+
+        </MenuItem>
+
+
+        <MenuItem value="docena">
+
+          Docena
+
+        </MenuItem>
+
+
+        <MenuItem value="media_docena">
+
+          Media docena
+
+        </MenuItem>
+
+
+        <MenuItem value="bandeja">
+
+          Bandeja
+
+        </MenuItem>
+
+
+      </TextField>
+
+
+
+
+
+
+
+      <TextField
+
+        select
+
+        label="Tipo"
+
+        name="tipo"
+
+        value={product.tipo}
+
+        onChange={handleChange}
+
+      >
+
+
+        <MenuItem value="producto">
+
+          Producto
+
+        </MenuItem>
+
+
+        <MenuItem value="materia_prima">
+
+          Materia prima
+
+        </MenuItem>
+
+
+        <MenuItem value="elaborado">
+
+          Elaborado
+
+        </MenuItem>
+
+
+      </TextField>
+
+
+
+
+
+
+
+      <TextField
+
+        label="Precio venta"
 
         name="precio"
 
@@ -173,9 +327,9 @@ export default function ProductForm({
 
         onChange={handleChange}
 
-        required
-
       />
+
+
 
 
 
@@ -195,6 +349,8 @@ export default function ProductForm({
 
 
 
+
+
       <TextField
 
         label="Stock mínimo"
@@ -211,6 +367,125 @@ export default function ProductForm({
 
 
 
+
+
+      <TextField
+
+        label="Margen %"
+
+        name="margen"
+
+        type="number"
+
+        value={product.margen}
+
+        onChange={handleChange}
+
+      />
+
+
+
+
+
+
+      <FormControlLabel
+
+        control={
+
+          <Checkbox
+
+            checked={product.controlaStock}
+
+            onChange={handleCheck}
+
+            name="controlaStock"
+
+          />
+
+        }
+
+        label="Controla stock"
+
+      />
+
+
+
+
+
+      <FormControlLabel
+
+        control={
+
+          <Checkbox
+
+            checked={product.esMateriaPrima}
+
+            onChange={handleCheck}
+
+            name="esMateriaPrima"
+
+          />
+
+        }
+
+        label="Es materia prima"
+
+      />
+
+
+
+
+
+      <FormControlLabel
+
+        control={
+
+          <Checkbox
+
+            checked={product.esElaborado}
+
+            onChange={handleCheck}
+
+            name="esElaborado"
+
+          />
+
+        }
+
+        label="Es elaborado"
+
+      />
+
+
+
+
+
+      <FormControlLabel
+
+        control={
+
+          <Checkbox
+
+            checked={product.tieneReceta}
+
+            onChange={handleCheck}
+
+            name="tieneReceta"
+
+          />
+
+        }
+
+        label="Tiene receta"
+
+      />
+
+
+
+
+
+
+
       <Button
 
         type="submit"
@@ -220,9 +495,13 @@ export default function ProductForm({
       >
 
         {
+
           initialProduct
-            ? "Actualizar producto"
-            : "Guardar producto"
+
+          ? "Actualizar producto"
+
+          : "Guardar producto"
+
         }
 
 
@@ -231,7 +510,6 @@ export default function ProductForm({
 
 
     </Box>
-
 
   );
 

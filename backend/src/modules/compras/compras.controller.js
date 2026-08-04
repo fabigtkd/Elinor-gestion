@@ -2,7 +2,12 @@ const comprasService = require("./compras.service");
 
 
 
-function getCompras(req,res){
+// ===============================
+// OBTENER COMPRAS
+// ===============================
+
+function getCompras(req, res) {
+
 
   comprasService.getCompras(
 
@@ -13,7 +18,7 @@ function getCompras(req,res){
 
         return res.status(500).json({
 
-          error:"Error obteniendo compras"
+          error:error.message
 
         });
 
@@ -27,46 +32,36 @@ function getCompras(req,res){
 
   );
 
+
 }
 
 
 
 
 
-function createCompra(req,res){
+// ===============================
+// OBTENER REMITO POR ID
+// ===============================
+
+function getCompraById(req,res){
 
 
-  const compra = req.body || {};
-
-console.log("DATOS RECIBIDOS:", req.body);
-
-  if(!compra.tipo || !compra.producto){
-
-
-    return res.status(400).json({
-
-      error:"Faltan datos obligatorios"
-
-    });
-
-
-  }
+  const id = Number(req.params.id);
 
 
 
+  comprasService.getCompraById(
 
-  comprasService.createCompra(
+    id,
 
-    compra,
-
-    (error,resultado)=>{
+    (error,compra)=>{
 
 
       if(error){
 
         return res.status(500).json({
 
-          error:"Error guardando compra"
+          error:error.message
 
         });
 
@@ -74,13 +69,19 @@ console.log("DATOS RECIBIDOS:", req.body);
 
 
 
-      res.json({
+      if(!compra){
 
-        mensaje:"Compra registrada",
+        return res.status(404).json({
 
-        id:resultado.id
+          error:"Remito no encontrado"
 
-      });
+        });
+
+      }
+
+
+
+      res.json(compra);
 
 
 
@@ -93,10 +94,193 @@ console.log("DATOS RECIBIDOS:", req.body);
 
 
 
+
+
+// ===============================
+// CREAR REMITO
+// ===============================
+
+function createCompra(req,res){
+
+
+  const compra = req.body;
+
+
+
+  if(!compra.detalle || compra.detalle.length === 0){
+
+
+    return res.status(400).json({
+
+      error:"Debe ingresar al menos un producto"
+
+    });
+
+
+  }
+
+
+
+
+  const compraPreparada = {
+
+
+    proveedorId:Number(compra.proveedorId || 1),
+
+    remito:compra.remito || "",
+
+    fecha:compra.fecha,
+
+    observaciones:compra.observaciones || "",
+
+    total:Number(compra.total || 0),
+
+    contado:Number(compra.contado || 0),
+
+    transferencia:Number(compra.transferencia || 0),
+
+    detalle:compra.detalle
+
+
+  };
+
+
+
+
+
+  comprasService.createCompra(
+
+
+    compraPreparada,
+
+
+    (error,resultado)=>{
+
+
+      if(error){
+
+
+        console.error(error);
+
+
+        return res.status(500).json({
+
+          error:error.message
+
+        });
+
+
+      }
+
+
+
+      res.status(201).json(resultado);
+
+
+
+    }
+
+
+  );
+
+
+
+}
+
+
+
+
+
+// ===============================
+// ACTUALIZAR REMITO
+// ===============================
+
+function updateCompra(req,res){
+
+
+  const id = Number(req.params.id);
+
+
+  const compra = req.body;
+
+
+
+  if(!compra.detalle || compra.detalle.length === 0){
+
+
+    return res.status(400).json({
+
+      error:"El remito debe tener productos"
+
+    });
+
+
+  }
+
+
+
+
+  comprasService.updateCompra(
+
+    id,
+
+    compra,
+
+
+    (error,resultado)=>{
+
+
+      if(error){
+
+
+        console.error(error);
+
+
+        return res.status(500).json({
+
+          error:error.message
+
+        });
+
+
+      }
+
+
+
+      res.json({
+
+        mensaje:"Remito actualizado correctamente",
+
+        id:resultado.id
+
+
+      });
+
+
+
+    }
+
+
+  );
+
+
+
+}
+
+
+
+
+
 module.exports = {
+
 
   getCompras,
 
-  createCompra
+  getCompraById,
+
+  createCompra,
+
+  updateCompra
+
 
 };

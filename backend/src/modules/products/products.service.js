@@ -1,25 +1,78 @@
 const db = require("../../database/connection");
 
 
+
 function getAll(callback) {
 
   db.all(
-    "SELECT * FROM productos ORDER BY nombre",
+
+    `
+    SELECT *
+
+    FROM productos
+
+    ORDER BY nombre ASC
+    `,
+
     [],
+
     callback
+
   );
 
 }
 
 
 
+
+
+
+
 function create(product, callback) {
 
+
   const sql = `
+
     INSERT INTO productos
-    (nombre, categoria, precio, stock, stockMinimo, unidad)
-    VALUES (?, ?, ?, ?, ?, ?)
+
+    (
+
+      nombre,
+
+      categoria,
+
+      precio,
+
+      stock,
+
+      stockMinimo,
+
+      unidad,
+
+      tipo,
+
+      controlaStock,
+
+      esMateriaPrima,
+
+      esElaborado,
+
+      tieneReceta,
+
+      margen,
+
+      precioVenta,
+
+      activo
+
+    )
+
+    VALUES
+
+    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
   `;
+
 
 
   db.run(
@@ -32,25 +85,50 @@ function create(product, callback) {
 
       product.categoria,
 
-      product.precio,
+      product.precio || 0,
 
-      product.stock,
+      product.stock || 0,
 
-      product.stockMinimo,
+      product.stockMinimo || 0,
 
-      product.unidad,
+      product.unidad || "kg",
+
+      product.tipo || "producto",
+
+      product.controlaStock ? 1 : 0,
+
+      product.esMateriaPrima ? 1 : 0,
+
+      product.esElaborado ? 1 : 0,
+
+      product.tieneReceta ? 1 : 0,
+
+      product.margen || 0,
+
+      product.precioVenta || 0,
+
+      product.activo ?? 1,
 
     ],
 
-    function (err) {
+    function(err){
 
-      callback(err, this.lastID);
+      callback(
+        err,
+        this.lastID
+      );
 
     }
 
   );
 
+
 }
+
+
+
+
+
 
 
 
@@ -59,9 +137,11 @@ function update(id, product, callback) {
 
   const sql = `
 
+
     UPDATE productos
 
     SET
+
 
       nombre = ?,
 
@@ -73,9 +153,27 @@ function update(id, product, callback) {
 
       stockMinimo = ?,
 
-      unidad = ?
+      unidad = ?,
+
+      tipo = ?,
+
+      controlaStock = ?,
+
+      esMateriaPrima = ?,
+
+      esElaborado = ?,
+
+      tieneReceta = ?,
+
+      margen = ?,
+
+      precioVenta = ?,
+
+      activo = ?
+
 
     WHERE id = ?
+
 
   `;
 
@@ -91,13 +189,29 @@ function update(id, product, callback) {
 
       product.categoria,
 
-      product.precio,
+      product.precio || 0,
 
-      product.stock,
+      product.stock || 0,
 
-      product.stockMinimo,
+      product.stockMinimo || 0,
 
-      product.unidad,
+      product.unidad || "kg",
+
+      product.tipo || "producto",
+
+      product.controlaStock ? 1 : 0,
+
+      product.esMateriaPrima ? 1 : 0,
+
+      product.esElaborado ? 1 : 0,
+
+      product.tieneReceta ? 1 : 0,
+
+      product.margen || 0,
+
+      product.precioVenta || 0,
+
+      product.activo ?? 1,
 
       id,
 
@@ -112,14 +226,31 @@ function update(id, product, callback) {
 
 
 
+
+
+
+
+
 function remove(id, callback) {
 
 
   db.run(
 
-    "DELETE FROM productos WHERE id = ?",
+    `
 
-    [id],
+    UPDATE productos
+
+    SET activo = 0
+
+    WHERE id = ?
+
+    `,
+
+    [
+
+      id
+
+    ],
 
     callback
 
@@ -127,6 +258,10 @@ function remove(id, callback) {
 
 
 }
+
+
+
+
 
 
 

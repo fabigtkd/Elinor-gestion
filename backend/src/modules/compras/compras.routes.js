@@ -1,28 +1,55 @@
 const express = require("express");
 
+const controller = require("./compras.controller");
+
 const router = express.Router();
 
-const comprasController = require("./compras.controller");
+
+console.log("🔥 MODULE COMPRAS ROUTES ACTIVO");
 
 
+
+// ===============================
+// LISTADO DE COMPRAS
+// ===============================
 
 router.get(
-
   "/",
-
-  comprasController.getCompras
-
+  controller.getCompras
 );
 
 
+
+// ===============================
+// VER REMITO POR ID
+// ===============================
+
+router.get(
+  "/:id",
+  controller.getCompraById
+);
+
+
+
+// ===============================
+// CREAR REMITO
+// ===============================
 
 router.post(
-
   "/",
-
-  comprasController.createCompra
-
+  controller.createCompra
 );
+
+
+
+// ===============================
+// EDITAR REMITO
+// ===============================
+
+router.put("/:id", (req, res, next) => {
+  console.log("🔥 LLEGÓ PUT /api/compras/" + req.params.id);
+  next();
+}, controller.updateCompra);
 
 
 

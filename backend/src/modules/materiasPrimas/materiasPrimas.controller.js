@@ -3,30 +3,32 @@ const service = require("./materiasPrimas.service");
 
 
 
-function getMateriasPrimas(req, res) {
+
+function getMateriasPrimas(req,res){
 
 
-  service.getAll((err, rows) => {
+  service.getAll(
+
+    (err,rows)=>{
 
 
-    if (err) {
+      if(err){
+
+        return res.status(500).json({
+
+          error:err.message
+
+        });
+
+      }
 
 
-      return res.status(500).json({
-
-        error: err.message,
-
-      });
+      res.json(rows);
 
 
     }
 
-
-
-    res.json(rows);
-
-
-  });
+  );
 
 
 }
@@ -36,25 +38,26 @@ function getMateriasPrimas(req, res) {
 
 
 
-function createMateriaPrima(req, res) {
+
+
+function createMateriaPrima(req,res){
+
 
 
   service.create(
 
     req.body,
 
-    (err, id) => {
+    (err,id)=>{
 
 
-      if (err) {
-
+      if(err){
 
         return res.status(500).json({
 
-          error: err.message,
+          error:err.message
 
         });
-
 
       }
 
@@ -82,12 +85,107 @@ function createMateriaPrima(req, res) {
 
 
 
-module.exports = {
+
+
+function updateMateriaPrima(req,res){
+
+
+
+  service.update(
+
+    req.params.id,
+
+    req.body,
+
+    (err)=>{
+
+
+      if(err){
+
+        return res.status(500).json({
+
+          error:err.message
+
+        });
+
+      }
+
+
+
+      res.json({
+
+        mensaje:
+        "Materia prima actualizada correctamente"
+
+      });
+
+
+    }
+
+  );
+
+
+}
+
+
+
+
+
+
+
+
+function getOrigenes(req,res){
+
+
+
+  service.getOrigenes(
+
+    req.params.id,
+
+    (err,rows)=>{
+
+
+      if(err){
+
+  console.error("ERROR MATERIAS PRIMAS:", err);
+
+  return res.status(500).json({
+
+    error:err.message
+
+  });
+
+}
+
+
+
+      res.json(rows);
+
+
+    }
+
+  );
+
+
+}
+
+
+
+
+
+
+
+
+module.exports={
 
 
   getMateriasPrimas,
 
   createMateriaPrima,
+
+  updateMateriaPrima,
+
+  getOrigenes
 
 
 };
