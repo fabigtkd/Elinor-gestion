@@ -133,64 +133,30 @@ function getCompraById(id, callback) {
 
 
 // ===============================
-// CREAR COMPRA
+// GENERAR NUMERO AUTOMATICO REMITO
 // ===============================
 
-function createCompra(data, callback) {
+function generarNumeroRemito(callback){
 
-
-  const {
-
-    proveedorId,
-
-    remito,
-
-    fecha,
-
-    total,
-
-    contado,
-
-    transferencia,
-
-    observaciones,
-
-    detalle
-
-  } = data;
-
-
-
-  const pendiente =
-
-    Number(total) -
-
-    (
-
-      Number(contado) +
-
-      Number(transferencia)
-
-    );
-
-
-
-
+console.log("🔥 GENERANDO NUMERO REMITO");
   db.get(
 
     `
-    SELECT nombre,saldo
+    SELECT remito
 
-    FROM proveedores
+    FROM compras
 
-    WHERE id = ?
+    WHERE remito LIKE 'REM-%'
+
+    ORDER BY id DESC
+
+    LIMIT 1
 
     `,
 
-    [proveedorId],
+    [],
 
-
-    (error,proveedor)=>{
+    (error,resultado)=>{
 
 
       if(error){
@@ -201,157 +167,36 @@ function createCompra(data, callback) {
 
 
 
-      const saldoAnterior =
-        Number(proveedor?.saldo || 0);
+      let numero = 1;
 
 
 
-      const saldoNuevo =
-        saldoAnterior + pendiente;
+      if(resultado && resultado.remito){
 
 
+        const ultimo = Number(
 
+          resultado.remito.replace("REM-","")
 
+        );
 
-      db.run(
 
-        `
-        INSERT INTO compras
+        numero = ultimo + 1;
 
-        (
 
-        proveedorId,
+      }
 
-        fecha,
 
-        remito,
 
-        observaciones,
+      const remitoNuevo =
 
-        total,
+        "REM-" +
 
-        contado,
+        String(numero).padStart(6,"0");
 
-        transferencia,
+console.log("✅ REMITO GENERADO:", remitoNuevo);
 
-        cuentaCorriente,
-
-        saldoAnterior,
-
-        saldoNuevo
-
-        )
-
-        VALUES (?,?,?,?,?,?,?,?,?,?)
-
-        `,
-
-
-        [
-
-          proveedorId,
-
-          fecha,
-
-          remito,
-
-          observaciones,
-
-          total,
-
-          contado,
-
-          transferencia,
-
-          pendiente,
-
-          saldoAnterior,
-
-          saldoNuevo
-
-        ],
-
-
-
-        function(errorInsert){
-
-
-          if(errorInsert){
-
-            return callback(errorInsert);
-
-          }
-
-
-
-          const id=this.lastID;
-
-
-
-          insertarDetalle(
-
-            id,
-
-            detalle,
-
-            ()=>{
-
-
-
-              db.run(
-
-                `
-
-                UPDATE proveedores
-
-                SET saldo=?
-
-                WHERE id=?
-
-                `,
-
-                [
-
-                  saldoNuevo,
-
-                  proveedorId
-
-                ]
-
-              );
-
-
-
-
-              callback(null,{
-
-                id,
-
-                proveedorId,
-
-                proveedorNombre:proveedor?.nombre || "",
-
-                total,
-
-                cuentaCorriente:pendiente,
-
-                saldoAnterior,
-
-                saldoNuevo
-
-              });
-
-
-
-            }
-
-          );
-
-
-        }
-
-
-      );
+      callback(null,remitoNuevo);
 
 
 
@@ -367,6 +212,267 @@ function createCompra(data, callback) {
 
 
 
+// ===============================
+// CREAR COMPRA
+// ===============================
+
+function createCompra(data, callback) {
+
+
+  const {
+
+    proveedorId,
+
+    fecha,
+
+    total,
+
+    contado,
+
+    transferencia,
+
+    observaciones,
+
+    detalle
+
+  } = data;
+    const pendiente =
+
+    Number(total) -
+
+    (
+
+      Number(contado) +
+
+      Number(transferencia)
+
+    );
+
+
+
+  generarNumeroRemito(
+
+    (errorRemito,remitoAutomatico)=>{
+
+
+      if(errorRemito){
+
+        return callback(errorRemito);
+
+      }
+
+
+
+
+      db.get(
+
+        `
+        SELECT nombre,saldo
+
+        FROM proveedores
+
+        WHERE id = ?
+
+        `,
+
+        [proveedorId],
+
+
+        (error,proveedor)=>{
+
+
+          if(error){
+
+            return callback(error);
+
+          }
+
+
+
+          const saldoAnterior =
+
+            Number(proveedor?.saldo || 0);
+
+
+
+          const saldoNuevo =
+
+            saldoAnterior + pendiente;
+
+
+
+
+
+
+          db.run(
+
+            `
+            INSERT INTO compras
+
+            (
+
+            proveedorId,
+
+            fecha,
+
+            remito,
+
+            observaciones,
+
+            total,
+
+            contado,
+
+            transferencia,
+
+            cuentaCorriente,
+
+            saldoAnterior,
+
+            saldoNuevo
+
+            )
+
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+
+            `,
+
+
+            [
+
+              proveedorId,
+
+              fecha,
+
+              remitoAutomatico,
+
+              observaciones,
+
+              total,
+
+              contado,
+
+              transferencia,
+
+              pendiente,
+
+              saldoAnterior,
+
+              saldoNuevo
+
+            ],
+
+
+
+            function(errorInsert){
+
+
+              if(errorInsert){
+
+                return callback(errorInsert);
+
+              }
+
+
+
+              const id=this.lastID;
+
+
+
+              insertarDetalle(
+
+                id,
+
+                detalle,
+
+                ()=>{
+
+
+
+                  db.run(
+
+                    `
+
+                    UPDATE proveedores
+
+                    SET saldo=?
+
+                    WHERE id=?
+
+                    `,
+
+                    [
+
+                      saldoNuevo,
+
+                      proveedorId
+
+                    ]
+
+                  );
+
+
+
+
+
+                  callback(null,{
+
+                    id,
+
+                    proveedorId,
+
+                    proveedorNombre:
+
+                      proveedor?.nombre || "",
+
+                    remito:
+
+                      remitoAutomatico,
+
+                    total,
+
+                    cuentaCorriente:
+
+                      pendiente,
+
+                    saldoAnterior,
+
+                    saldoNuevo
+
+                  });
+
+
+
+                }
+
+              );
+
+
+
+            }
+
+
+          );
+
+
+
+        }
+
+
+      );
+
+
+    }
+
+  );
+
+
+}
+
+
+
+
+
 
 // ===============================
 // EDITAR COMPRA
@@ -377,17 +483,21 @@ function updateCompra(id,data,callback){
 
   const {
 
-    proveedorId,
-    remito,
-    fecha,
-    total,
-    contado,
-    transferencia,
-    observaciones,
-    detalle
+  proveedorId,
 
-  } = data;
+  fecha,
 
+  total,
+
+  contado,
+
+  transferencia,
+
+  observaciones,
+
+  detalle
+
+} = data;
 
 
   const pendienteNuevo =
@@ -395,8 +505,11 @@ function updateCompra(id,data,callback){
     Number(total || 0) -
 
     (
+
       Number(contado || 0) +
+
       Number(transferencia || 0)
+
     );
 
 
@@ -418,33 +531,33 @@ function updateCompra(id,data,callback){
 
     (error,compraAnterior)=>{
 
-  console.log("================================");
-  console.log("UPDATE COMPRA");
-  console.log("ID recibido:", id);
-  console.log("Compra encontrada:", compraAnterior);
-  console.log("================================");
 
-  if(error){
+      console.log("================================");
+      console.log("UPDATE COMPRA");
+      console.log("ID recibido:",id);
+      console.log("Compra encontrada:",compraAnterior);
+      console.log("================================");
 
-    return callback(error);
 
-  }
+
+      if(error){
+
+        return callback(error);
+
+      }
 
 
 
       if(!compraAnterior){
 
         return callback(
+
           new Error("Compra no encontrada")
+
         );
 
       }
-
-
-
-
-
-      const diferenciaSaldo =
+            const diferenciaSaldo =
 
         pendienteNuevo -
 
@@ -465,7 +578,6 @@ function updateCompra(id,data,callback){
 
         fecha=?,
 
-        remito=?,
 
         observaciones=?,
 
@@ -488,7 +600,6 @@ function updateCompra(id,data,callback){
 
           fecha,
 
-          remito,
 
           observaciones,
 
@@ -503,6 +614,7 @@ function updateCompra(id,data,callback){
           id
 
         ],
+
 
 
         (errorUpdate)=>{
@@ -544,7 +656,6 @@ function updateCompra(id,data,callback){
 
 
 
-
           db.run(
 
             `
@@ -576,6 +687,7 @@ function updateCompra(id,data,callback){
                     id,
 
                     cuentaCorriente:
+
                       pendienteNuevo
 
                   });
@@ -587,6 +699,7 @@ function updateCompra(id,data,callback){
 
 
             }
+
 
           );
 
@@ -607,6 +720,10 @@ function updateCompra(id,data,callback){
 
 }
 
+
+
+
+
 // ===============================
 // INSERTAR DETALLE
 // ===============================
@@ -614,7 +731,7 @@ function updateCompra(id,data,callback){
 function insertarDetalle(compraId,detalle,callback){
 
 
-  const stmt=db.prepare(
+  const stmt = db.prepare(
 
     `
 
@@ -682,7 +799,7 @@ function insertarDetalle(compraId,detalle,callback){
 
 
 
-module.exports={
+module.exports = {
 
 
   getCompras,
