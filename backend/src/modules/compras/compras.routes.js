@@ -1,56 +1,44 @@
 const express = require("express");
 
-const controller = require("./compras.controller");
-
 const router = express.Router();
 
+const {
+  getCompras,
+  getComprasByProveedor,
+  getCompraById,
+  createCompra,
+  updateCompra,
+} = require("./compras.controller");
 
-console.log("🔥 MODULE COMPRAS ROUTES ACTIVO");
+// ============================================================
+// OBTENER TODAS LAS COMPRAS
+// ============================================================
 
+router.get("/", getCompras);
 
+// ============================================================
+// OBTENER COMPRAS DE UN PROVEEDOR
+// IMPORTANTE: esta ruta debe estar antes de /:id
+// ============================================================
 
-// ===============================
-// LISTADO DE COMPRAS
-// ===============================
+router.get("/proveedor/:proveedorId", getComprasByProveedor);
 
-router.get(
-  "/",
-  controller.getCompras
-);
+// ============================================================
+// OBTENER REMITO POR ID
+// ============================================================
 
+router.get("/:id", getCompraById);
 
-
-// ===============================
-// VER REMITO POR ID
-// ===============================
-
-router.get(
-  "/:id",
-  controller.getCompraById
-);
-
-
-
-// ===============================
+// ============================================================
 // CREAR REMITO
-// ===============================
+// ============================================================
 
-router.post(
-  "/",
-  controller.createCompra
-);
+router.post("/", createCompra);
 
+// ============================================================
+// ACTUALIZAR REMITO
+// ============================================================
 
-
-// ===============================
-// EDITAR REMITO
-// ===============================
-
-router.put("/:id", (req, res, next) => {
-  console.log("🔥 LLEGÓ PUT /api/compras/" + req.params.id);
-  next();
-}, controller.updateCompra);
-
-
+router.put("/:id", updateCompra);
 
 module.exports = router;

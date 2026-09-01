@@ -1,10 +1,15 @@
-const API_URL = "http://localhost:3001/api/products";
+const API_URL =
+  "http://localhost:3001/api/products";
 
 
+// ============================================================
+// OBTENER PRODUCTOS
+// ============================================================
 
 export async function getProducts() {
 
-  const response = await fetch(API_URL);
+  const response =
+    await fetch(API_URL);
 
   if (!response.ok) {
 
@@ -19,24 +24,30 @@ export async function getProducts() {
 }
 
 
+// ============================================================
+// CREAR PRODUCTO
+// ============================================================
 
+export async function createProduct(
+  product
+) {
 
-export async function createProduct(product) {
+  const response =
+    await fetch(
+      API_URL,
+      {
+        method: "POST",
 
-  const response = await fetch(API_URL, {
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
 
-    method: "POST",
+        body:
+          JSON.stringify(product),
 
-    headers: {
-
-      "Content-Type": "application/json",
-
-    },
-
-    body: JSON.stringify(product),
-
-  });
-
+      }
+    );
 
 
   if (!response.ok) {
@@ -53,31 +64,31 @@ export async function createProduct(product) {
 }
 
 
+// ============================================================
+// ACTUALIZAR PRODUCTO
+// ============================================================
 
+export async function updateProduct(
+  id,
+  product
+) {
 
-export async function updateProduct(id, product) {
+  const response =
+    await fetch(
+      `${API_URL}/${id}`,
+      {
+        method: "PUT",
 
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
 
-  const response = await fetch(
+        body:
+          JSON.stringify(product),
 
-    `${API_URL}/${id}`,
-
-    {
-
-      method: "PUT",
-
-      headers: {
-
-        "Content-Type": "application/json",
-
-      },
-
-      body: JSON.stringify(product),
-
-    }
-
-  );
-
+      }
+    );
 
 
   if (!response.ok) {
@@ -90,6 +101,5 @@ export async function updateProduct(id, product) {
 
 
   return await response.json();
-
 
 }

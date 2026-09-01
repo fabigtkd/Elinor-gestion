@@ -1,601 +1,270 @@
-import {
-  Box,
-  Typography,
-  TextField,
-  MenuItem,
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+import { Box, Typography, TextField, MenuItem, Button, Paper, Divider } from "@mui/material";
 
-import { useEffect, useState } from "react";
-
-import {
-  createCosto,
-  getCostos,
-  updateCosto,
-} from "./services/costosService";
-
+import { useMemo, useState } from "react";
 
 export default function Costos() {
-
-
-  const [costo, setCosto] = useState({
-
+  const [datos, setDatos] = useState({
     nombre: "",
-
     unidad: "kg",
-
-    costoBase: "",
-
+    costo: "",
     margen: "",
-
+    precioVenta: "",
   });
 
-
-
-  const [editando, setEditando] = useState(null);
-
-
-
-  const [precioSugerido, setPrecioSugerido] = useState(0);
-
-
-
-  const [costos, setCostos] = useState([]);
-
-
-
-
-  useEffect(() => {
-
-    cargarCostos();
-
-  }, []);
-
-
-
-
-
-  async function cargarCostos() {
-
-    try {
-
-      const data = await getCostos();
-
-      setCostos(data);
-
-
-    } catch(error) {
-
-      console.error(
-        "Error cargando costos:",
-        error
-      );
-
-    }
-
-  }
-
-
-
-
-
-
   function handleChange(e) {
+    const { name, value } = e.target;
 
-    const nuevoCosto = {
-
-      ...costo,
-
-      [e.target.name]: e.target.value,
-
-    };
-
-
-    setCosto(nuevoCosto);
-
-
-    calcularPrecio(nuevoCosto);
-
-
+    setDatos((actual) => ({
+      ...actual,
+      [name]: value,
+    }));
   }
 
-
-
-
-
-
-
-  function calcularPrecio(data) {
-
-
-    const base = Number(data.costoBase);
-
-    const margen = Number(data.margen);
-
-
-
-    if (
-      base > 0 &&
-      margen > 0 &&
-      margen < 100
-    ) {
-
-
-      const precio =
-        base / (1 - margen / 100);
-
-
-
-      setPrecioSugerido(
-        Math.round(precio)
-      );
-
-
-    } else {
-
-      setPrecioSugerido(0);
-
-    }
-
-
-  }
-
-
-
-
-
-
-
-  function editarCosto(item) {
-
-
-    setEditando(item.id);
-
-
-    setCosto({
-
-      nombre: item.nombre,
-
-      unidad: item.unidad,
-
-      costoBase: item.costoBase,
-
-      margen: item.margen,
-
+  function limpiar() {
+    setDatos({
+      nombre: "",
+      unidad: "kg",
+      costo: "",
+      margen: "",
+      precioVenta: "",
     });
-
-
-    setPrecioSugerido(
-      item.precioSugerido
-    );
-
-
   }
 
+  const resultado = useMemo(() => {
+    const costo = Number(datos.costo || 0);
+    const margen = Number(datos.margen || 0);
+    const precioVenta = Number(datos.precioVenta || 0);
 
+    let precioSugerido = 0;
+    let gananciaSugerida = 0;
+    let gananciaActual = 0;
+    let margenReal = 0;
+    let diferenciaPrecio = 0;
 
-
-
-
-
-  async function guardarCosto() {
-
-
-    try {
-
-
-      const datosCosto = {
-
-
-        nombre: costo.nombre,
-
-        unidad: costo.unidad,
-
-        costoBase: Number(costo.costoBase),
-
-        margen: Number(costo.margen),
-
-        precioSugerido,
-
-
-      };
-
-
-
-      if(editando) {
-
-
-        await updateCosto(
-
-          editando,
-
-          datosCosto
-
-        );
-
-
-      } else {
-
-
-        await createCosto(
-
-          datosCosto
-
-        );
-
-
-      }
-
-
-
-      await cargarCostos();
-
-
-
-      setEditando(null);
-
-
-
-      setCosto({
-
-        nombre: "",
-
-        unidad: "kg",
-
-        costoBase: "",
-
-        margen: "",
-
-      });
-
-
-
-      setPrecioSugerido(0);
-
-
-
-    } catch(error) {
-
-
-      console.error(
-
-        "Error guardando costo:",
-
-        error
-
-      );
-
-
+    if (costo > 0 && margen >= 0 && margen < 100) {
+      precioSugerido = costo / (1 - margen / 100);
+      gananciaSugerida = precioSugerido - costo;
     }
 
+    if (costo > 0 && precioVenta > 0) {
+      gananciaActual = precioVenta - costo;
+      margenReal = (gananciaActual / precioVenta) * 100;
+    }
 
+    if (precioVenta > 0 && precioSugerido > 0) {
+      diferenciaPrecio = precioSugerido - precioVenta;
+    }
+
+    return {
+      precioSugerido,
+      gananciaSugerida,
+      gananciaActual,
+      margenReal,
+      diferenciaPrecio,
+    };
+  }, [datos]);
+
+  function moneda(valor) {
+    return Number(valor || 0).toLocaleString("es-AR", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
   }
 
+  function porcentaje(valor) {
+    return Number(valor || 0).toLocaleString("es-AR", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
+  }
 
+  const hayResultado = resultado.precioSugerido > 0;
 
-
-
-
+  const hayPrecioActual = Number(datos.precioVenta || 0) > 0 && Number(datos.costo || 0) > 0;
 
   return (
-
-    <Box sx={{p:3}}>
-
-
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-      >
-
-        Costos
-
-      </Typography>
-
-
-
-      <Typography color="text.secondary">
-
-        Cálculo de costos y costos vigentes
-
-      </Typography>
-
-
-
-
-
-      <Paper
-
-        sx={{
-
-          mt:3,
-
-          p:3,
-
-          maxWidth:500,
-
-        }}
-
-      >
-
-
-        <TextField
-
-          fullWidth
-
-          label="Producto"
-
-          name="nombre"
-
-          value={costo.nombre}
-
-          onChange={handleChange}
-
-          sx={{mb:2}}
-
-        />
-
-
-
-        <TextField
-
-          select
-
-          fullWidth
-
-          label="Unidad"
-
-          name="unidad"
-
-          value={costo.unidad}
-
-          onChange={handleChange}
-
-          sx={{mb:2}}
-
-        >
-
-          <MenuItem value="kg">
-
-            Kilogramo
-
-          </MenuItem>
-
-
-          <MenuItem value="unidad">
-
-            Unidad
-
-          </MenuItem>
-
-
-        </TextField>
-
-
-
-
-
-        <TextField
-
-          fullWidth
-
-          type="number"
-
-          label="Costo base"
-
-          name="costoBase"
-
-          value={costo.costoBase}
-
-          onChange={handleChange}
-
-          sx={{mb:2}}
-
-        />
-
-
-
-
-
-        <TextField
-
-          fullWidth
-
-          type="number"
-
-          label="Margen deseado %"
-
-          name="margen"
-
-          value={costo.margen}
-
-          onChange={handleChange}
-
-          sx={{mb:3}}
-
-        />
-
-
-
-
-
-        <Typography variant="h6">
-
-          Precio sugerido: ${precioSugerido}
-
+    <Box sx={{ width: "100%", maxWidth: 900 }}>
+      {/* ENCABEZADO */}
+
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" fontWeight="bold">
+          Costos
         </Typography>
 
+        <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+          Calculadora de costos y precios
+        </Typography>
+      </Box>
 
+      {/* CALCULADORA */}
 
-
-        <Button
-
-          variant="contained"
-
-          sx={{mt:3}}
-
-          onClick={guardarCosto}
-
-        >
-
-          {editando
-            ? "Actualizar costo"
-            : "Guardar cálculo"}
-
-        </Button>
-
-
-      </Paper>
-
-
-
-
-
-
-      <Typography
-
-        variant="h5"
-
-        fontWeight="bold"
-
-        sx={{mt:5, mb:2}}
-
+      <Paper
+        sx={{
+          p: 3,
+          borderRadius: 2,
+          border: "1px solid rgba(212,167,44,0.18)",
+          boxShadow: "0 8px 22px rgba(0,0,0,0.28)",
+        }}
       >
-
-        Costos vigentes
-
-      </Typography>
-
-
-
-
-
-      <TableContainer component={Paper}>
-
-
-        <Table>
-
-
-          <TableHead>
-
-            <TableRow>
-
-
-              <TableCell>
-                Producto
-              </TableCell>
-
-
-              <TableCell>
-                Unidad
-              </TableCell>
-
-
-              <TableCell>
-                Costo
-              </TableCell>
-
-
-              <TableCell>
-                Margen
-              </TableCell>
-
-
-              <TableCell>
-                Precio sugerido
-              </TableCell>
-
-
-              <TableCell>
-                Acción
-              </TableCell>
-
-
-            </TableRow>
-
-          </TableHead>
-
-
-
-
-
-          <TableBody>
-
-
-            {costos.map((item)=>(
-
-
-              <TableRow key={item.id}>
-
-
-                <TableCell>
-                  {item.nombre}
-                </TableCell>
-
-
-                <TableCell>
-                  {item.unidad}
-                </TableCell>
-
-
-                <TableCell>
-                  ${item.costoBase}
-                </TableCell>
-
-
-                <TableCell>
-                  {item.margen}%
-                </TableCell>
-
-
-                <TableCell>
-                  ${item.precioSugerido}
-                </TableCell>
-
-
-                <TableCell>
-
-                  <Button
-
-                    variant="outlined"
-
-                    size="small"
-
-                    onClick={() => editarCosto(item)}
-
-                  >
-
-                    Editar
-
-                  </Button>
-
-
-                </TableCell>
-
-
-              </TableRow>
-
-
-            ))}
-
-
-          </TableBody>
-
-
-        </Table>
-
-
-      </TableContainer>
-
-
+        <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+          Calculadora de precio
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Ingresá los valores manualmente para calcular el precio sugerido.
+        </Typography>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "2fr 1fr",
+            },
+            gap: 2,
+          }}
+        >
+          <TextField
+            fullWidth
+            label="Producto"
+            name="nombre"
+            value={datos.nombre}
+            onChange={handleChange}
+            placeholder="Ej.: Milanesa de pollo"
+          />
+
+          <TextField select fullWidth label="Unidad" name="unidad" value={datos.unidad} onChange={handleChange}>
+            <MenuItem value="kg">Kilogramo</MenuItem>
+            <MenuItem value="unidad">Unidad</MenuItem>
+          </TextField>
+
+          <TextField
+            fullWidth
+            type="number"
+            label={`Costo por ${datos.unidad}`}
+            name="costo"
+            value={datos.costo}
+            onChange={handleChange}
+            inputProps={{ min: 0, step: "0.01" }}
+          />
+
+          <TextField
+            fullWidth
+            type="number"
+            label="Margen deseado %"
+            name="margen"
+            value={datos.margen}
+            onChange={handleChange}
+            inputProps={{ min: 0, max: 99.99, step: "0.1" }}
+          />
+
+          <TextField
+            fullWidth
+            type="number"
+            label={`Precio de venta actual por ${datos.unidad}`}
+            name="precioVenta"
+            value={datos.precioVenta}
+            onChange={handleChange}
+            inputProps={{ min: 0, step: "0.01" }}
+            sx={{ gridColumn: { xs: "auto", sm: "1 / -1" } }}
+          />
+        </Box>
+
+        {/* RESULTADO PRINCIPAL */}
+
+        <Box
+          sx={{
+            mt: 3,
+            p: 3,
+            borderRadius: 2,
+            backgroundColor: "rgba(212,167,44,0.08)",
+            border: "1px solid rgba(212,167,44,0.22)",
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Precio sugerido
+          </Typography>
+
+          <Typography variant="h3" fontWeight="bold" sx={{ mt: 0.5, mb: 1 }}>
+            ${moneda(resultado.precioSugerido)}
+          </Typography>
+
+          {hayResultado && (
+            <Typography variant="body2" color="text.secondary">
+              Ganancia: {" $"}
+              {moneda(resultado.gananciaSugerida)}
+              {" por "}
+              {datos.unidad}
+            </Typography>
+          )}
+        </Box>
+
+        {/* ANALISIS DEL PRECIO ACTUAL */}
+
+        {hayPrecioActual && (
+          <>
+            <Divider sx={{ my: 3 }} />
+
+            <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+              Análisis del precio actual
+            </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+                gap: 2,
+              }}
+            >
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Ganancia actual
+                </Typography>
+
+                <Typography variant="h6" fontWeight="bold">
+                  ${moneda(resultado.gananciaActual)}
+                </Typography>
+              </Paper>
+
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Margen real
+                </Typography>
+
+                <Typography variant="h6" fontWeight="bold">
+                  {porcentaje(resultado.margenReal)}%
+                </Typography>
+              </Paper>
+
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Diferencia con sugerido
+                </Typography>
+
+                <Typography variant="h6" fontWeight="bold">
+                  {resultado.diferenciaPrecio >= 0 ? "+" : ""}${moneda(resultado.diferenciaPrecio)}
+                </Typography>
+              </Paper>
+            </Box>
+
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              {resultado.diferenciaPrecio > 0
+                ? `El precio actual está $${moneda(resultado.diferenciaPrecio)} por debajo del sugerido.`
+                : resultado.diferenciaPrecio < 0
+                  ? `El precio actual está $${moneda(Math.abs(resultado.diferenciaPrecio))} por encima del sugerido.`
+                  : "El precio actual coincide con el precio sugerido."}
+            </Typography>
+          </>
+        )}
+
+        {/* BOTONES */}
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+          <Button variant="outlined" onClick={limpiar}>
+            Limpiar
+          </Button>
+        </Box>
+      </Paper>
     </Box>
-
   );
-
 }
